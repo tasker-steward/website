@@ -3,7 +3,7 @@ import { AgentIcon, ArrowIcon, RetrainIcon, RoleDocIcon, StewardIcon, TrialIcon 
 import SiteFooter from "./components/SiteFooter";
 import JsonLd from "./components/JsonLd";
 import NewsletterSignup from "./components/NewsletterSignup";
-import { FAQS, homeJsonLd } from "@/lib/site";
+import { FAQS, HOME_FAQS, homeJsonLd } from "@/lib/site";
 
 const CHIPS = [
   "Answering calls after hours",
@@ -346,14 +346,17 @@ export default function Home() {
 
         <section className="section sand" style={{ paddingBlock: 96 }} aria-labelledby="faq-h">
           <div className="wrap faq-wrap">
-            <div>
+            <div className="faq-head">
               <p className="eyebrow">Questions</p>
               <h2 id="faq-h" className="h2">
                 Common questions
               </h2>
+              <a className="faq-all" href="/faq">
+                See all {FAQS.length} questions <span aria-hidden="true">&rarr;</span>
+              </a>
             </div>
             <div className="faq-list">
-              {FAQS.map(([q, a], i) => (
+              {HOME_FAQS.map(([q, a], i) => (
                 <details className="faq" key={q} open={i === 0}>
                   <summary>
                     {q}
@@ -362,6 +365,9 @@ export default function Home() {
                   <p>{a}</p>
                 </details>
               ))}
+              <a className="faq-all faq-all-foot" href="/faq">
+                See all {FAQS.length} questions <span aria-hidden="true">&rarr;</span>
+              </a>
             </div>
           </div>
         </section>

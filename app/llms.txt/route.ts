@@ -27,6 +27,7 @@ ${FAQS.map(([q, a]) => `### ${q}\n${a}`).join("\n\n")}
 
 ## Links
 - Home and Role Report request form: ${SITE_URL}/
+- Frequently asked questions: ${SITE_URL}/faq
 - Privacy Policy: ${SITE_URL}/privacy
 - SMS Terms: ${SITE_URL}/sms-terms
 

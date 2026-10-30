@@ -24,6 +24,59 @@ export const FAQS: [string, string][] = [
   ["Who's behind Tasker & Steward?", "We've spent 25 years building systems for businesses. Now we build custom AI solutions for the everyday challenges that slow them down, and we put a real person in charge of every agent we place."],
 ];
 
+// Shown on the home page. The full list lives at /faq.
+export const HOME_FAQ_QUESTIONS = [
+  "What is a Role Report?",
+  "What is an AI staffing agency?",
+  "What kinds of roles fit?",
+  "What does it cost?",
+  "Will this replace my staff?",
+  "What if the agent doesn't work out?",
+];
+
+export const FAQ_GROUPS: { title: string; questions: string[] }[] = [
+  {
+    title: "How it works",
+    questions: [
+      "What is a Role Report?",
+      "What is an AI staffing agency?",
+      "What kinds of roles fit?",
+      "Do I have to be hiring?",
+      "How long does onboarding take?",
+      "What does the Steward do?",
+    ],
+  },
+  {
+    title: "Pricing and terms",
+    questions: ["What does it cost?", "What if the agent doesn't work out?", "What happens if we cancel?"],
+  },
+  {
+    title: "Your team and your data",
+    questions: ["Will this replace my staff?", "What happens to our data?", "Who's behind Tasker & Steward?"],
+  },
+];
+
+const FAQ_MAP = new Map(FAQS);
+export const faqsFor = (questions: string[]): [string, string][] =>
+  questions.map((q) => {
+    const a = FAQ_MAP.get(q);
+    if (!a) throw new Error(`Unknown FAQ: ${q}`);
+    return [q, a];
+  });
+export const HOME_FAQS = faqsFor(HOME_FAQ_QUESTIONS);
+
+export function faqPageJsonLd(items: [string, string][], id: string) {
+  return {
+    "@type": "FAQPage",
+    "@id": id,
+    mainEntity: items.map(([q, a]) => ({
+      "@type": "Question",
+      name: q,
+      acceptedAnswer: { "@type": "Answer", text: a },
+    })),
+  };
+}
+
 const ORG_ID = `${SITE_URL}/#organization`;
 
 export function organizationJsonLd() {
@@ -108,15 +161,7 @@ export function homeJsonLd() {
           },
         ],
       },
-      {
-        "@type": "FAQPage",
-        "@id": `${SITE_URL}/#faq`,
-        mainEntity: FAQS.map(([q, a]) => ({
-          "@type": "Question",
-          name: q,
-          acceptedAnswer: { "@type": "Answer", text: a },
-        })),
-      },
+      faqPageJsonLd(HOME_FAQS, `${SITE_URL}/#faq`),
     ],
   };
 }
