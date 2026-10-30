@@ -13,7 +13,7 @@ npm run dev
 
 ## Role Report form
 The form posts to `/api/role-report`, which:
-1. Forwards the request to the CRM if `CRM_LEAD_WEBHOOK_URL` is set (creates a Lead with source "Website Form" and the SMS consent record).
+1. Forwards the request to the CRM if `CRM_LEAD_WEBHOOK_URL` is set. Production points at `https://tasker-steward-crm.vercel.app/api/public/website-lead`, authenticated with `CRM_LEAD_WEBHOOK_SECRET` (the same value as the CRM's `WEBSITE_LEAD_SECRET`). The CRM creates a Lead (source Website Form) and a Task to prepare the Role Report, with the SMS consent record in the task.
 2. Emails the team through Resend if `RESEND_API_KEY` is set (`NOTIFY_EMAIL`, `FROM_EMAIL`).
 
 At least one of the two must be configured or the form returns an error. See `.env.example`.
