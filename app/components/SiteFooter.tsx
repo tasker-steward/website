@@ -9,6 +9,7 @@ export default function SiteFooter() {
           · AI staffing with human accountability
         </span>
         <nav aria-label="Legal">
+          <a href="/insights">Monthly email</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/sms-terms">SMS Terms</a>
           <span>© {new Date().getFullYear()} Tasker &amp; Steward LLC</span>

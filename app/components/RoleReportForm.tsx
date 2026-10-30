@@ -33,6 +33,7 @@ export default function RoleReportForm() {
     const form = e.currentTarget;
     const data = Object.fromEntries(new FormData(form).entries()) as Record<string, string>;
     const smsConsent = data.sms_consent === "on";
+    const newsletter = data.newsletter === "on";
 
     if (smsConsent && !data.mobile?.trim()) {
       setError("Add a mobile number, or uncheck the text updates box.");
@@ -49,6 +50,7 @@ export default function RoleReportForm() {
         body: JSON.stringify({
           ...data,
           sms_consent: smsConsent,
+          newsletter,
           sms_consent_text: smsConsent ? SMS_CONSENT_TEXT : "",
           page: typeof window !== "undefined" ? window.location.href : "",
         }),
@@ -160,6 +162,11 @@ export default function RoleReportForm() {
           <input type="text" name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
+
+      <label className="consent">
+        <input type="checkbox" name="newsletter" />
+        <span>Also send me the Tasker &amp; Steward monthly email: AI and hiring news for owners, in plain English. Unsubscribe anytime.</span>
+      </label>
 
       <label className="consent">
         <input type="checkbox" name="sms_consent" />

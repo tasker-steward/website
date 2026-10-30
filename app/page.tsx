@@ -2,6 +2,7 @@ import RoleReportForm from "./components/RoleReportForm";
 import { AgentIcon, ArrowIcon, RetrainIcon, RoleDocIcon, StewardIcon, TrialIcon } from "./components/icons";
 import SiteFooter from "./components/SiteFooter";
 import JsonLd from "./components/JsonLd";
+import NewsletterSignup from "./components/NewsletterSignup";
 import { FAQS, homeJsonLd } from "@/lib/site";
 
 const CHIPS = [
@@ -361,6 +362,23 @@ export default function Home() {
                   <p>{a}</p>
                 </details>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="section newsletter-band" aria-labelledby="nl-h">
+          <div className="wrap nl-wrap">
+            <div className="nl-copy">
+              <p className="eyebrow">Tasker &amp; Steward Monthly</p>
+              <h2 id="nl-h" className="h2">
+                AI, hiring and the trades, in plain English.
+              </h2>
+              <p className="lead">
+                Once a month: what AI is changing about hiring, what the latest job reports mean for owners, industry trends worth knowing, and where an AI agent can take work off your team.
+              </p>
+            </div>
+            <div className="nl-box">
+              <NewsletterSignup />
             </div>
           </div>
         </section>

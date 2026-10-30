@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { subscribeToNewsletter } from "@/lib/newsletter";
 
 export const runtime = "nodejs";
 
@@ -13,6 +14,7 @@ type Payload = {
   posting?: string;
   sms_consent?: boolean;
   sms_consent_text?: string;
+  newsletter?: boolean;
   website?: string; // honeypot
   page?: string;
 };
@@ -45,6 +47,7 @@ export async function POST(req: Request) {
     sms_consent_text: body.sms_consent === true ? clean(body.sms_consent_text, 1000) : "",
     sms_consent_at: body.sms_consent === true ? new Date().toISOString() : null,
     sms_consent_source: body.sms_consent === true ? "Website Role Report form" : null,
+    newsletter_opt_in: body.newsletter === true,
     source: "Website Form",
     page: clean(body.page, 500),
     submitted_at: new Date().toISOString(),
@@ -60,6 +63,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Add a mobile number, or uncheck the text updates box." }, { status: 400 });
 
   const results: string[] = [];
+
+  // 0) Newsletter opt-in, only when they ticked the box themselves.
+  if (lead.newsletter_opt_in) {
+    const firstName = lead.name.split(/\s+/)[0];
+    results.push((await subscribeToNewsletter(lead.email, firstName)) ? "newsletter" : "newsletter_error");
+  }
 
   // 1) Forward to the CRM when it is live.
   const crmUrl = process.env.CRM_LEAD_WEBHOOK_URL;
@@ -93,6 +102,7 @@ export async function POST(req: Request) {
       ["Industry", lead.industry],
       ["Role", lead.role],
       ["Text updates", lead.sms_consent ? `Yes, agreed ${lead.sms_consent_at}` : "No"],
+      ["Newsletter", lead.newsletter_opt_in ? "Yes, subscribed" : "No"],
       ["Page", lead.page || ""],
     ];
     const html = `<div style="font-family:Arial,sans-serif;color:#14243A">

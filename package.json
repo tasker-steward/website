@@ -11,6 +11,8 @@
   "dependencies": {
     "@fontsource/libre-caslon-text": "5.2.7",
     "@fontsource/libre-franklin": "5.2.8",
+    "gray-matter": "4.0.3",
+    "marked": "14.1.4",
     "next": "15.5.27",
     "react": "19.1.1",
     "react-dom": "19.1.1"
