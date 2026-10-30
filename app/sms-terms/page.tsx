@@ -3,7 +3,8 @@ import LegalHeader from "../components/LegalHeader";
 import SiteFooter from "../components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "SMS Terms | Tasker & Steward",
+  title: "SMS Terms",
+  alternates: { canonical: "/sms-terms" },
   description: "Terms for Tasker & Steward text message updates.",
 };
 

@@ -1,6 +1,8 @@
 import RoleReportForm from "./components/RoleReportForm";
 import { AgentIcon, ArrowIcon, RetrainIcon, RoleDocIcon, StewardIcon, TrialIcon } from "./components/icons";
 import SiteFooter from "./components/SiteFooter";
+import JsonLd from "./components/JsonLd";
+import { FAQS, homeJsonLd } from "@/lib/site";
 
 const CHIPS = [
   "Answering calls after hours",
@@ -31,18 +33,7 @@ const COMPARE_ROWS: { label: string; software: string; custom: string; us: strin
   { label: "Pricing", software: "A subscription, plus your team's time", custom: "A project fee, plus hosting and support", us: "One setup fee, then a flat monthly rate" },
 ];
 
-const FAQS: [string, string][] = [
-  ["What kinds of roles fit?", "Roles with a real share of repeatable work: front desk and intake, scheduling and dispatch, customer service, lead follow-up, data entry and billing support. Your Role Report will tell you honestly if a role isn't a good fit."],
-  ["Do I have to be hiring?", "No. Send us any role you have today, or describe the work that keeps slipping through the cracks, and we'll break it down the same way."],
-  ["What does it cost?", "Each AI agent has a one-time setup fee and a monthly rate based on the role it covers and how much work it handles. Your Role Report shows the cost for your role before you commit to anything."],
-  ["How long does onboarding take?", "Onboarding takes about three weeks from kickoff to go-live. That includes connecting your systems, practice runs and a supervised first week before the agent works on its own."],
-  ["Will this replace my staff?", "It's not designed to. Agents take on after-hours and repetitive work, so the people you have, and the next person you hire, can focus on the parts that need a person."],
-  ["What does the Steward do?", "Your Steward is a real person on our team who manages your agent. They review its work every week, write performance reviews at 30, 60 and 90 days, make changes as your business changes, and answer when you call. They manage the agent, not your employees."],
-  ["What if the agent doesn't work out?", "We retrain it or replace it at no cost. Every placement starts with a 90-day trial, and it only becomes a 12-month term if you decide to keep the agent."],
-  ["What happens to our data?", "Your agent only gets access to the systems its job requires, and that access is logged. You'll get a written summary of what it collects, where it's stored and who on our team can see it."],
-  ["What happens if we cancel?", "You can cancel the service after the 90-day trial or at the end of your 12-month term. Your business data is always yours, and we'll give you a full export of it when the service ends. The agent itself, and the work we put into building it, stays with us."],
-  ["Who's behind Tasker & Steward?", "We've spent 25 years building systems for businesses. Now we build custom AI solutions for the everyday challenges that slow them down, and we put a real person in charge of every agent we place."],
-];
+
 
 export default function Home() {
   return (
@@ -51,6 +42,7 @@ export default function Home() {
         Skip to the Role Report form
       </a>
 
+      <main id="main">
       <section className="hero">
         <div className="wrap">
           <header className="topbar">
@@ -90,7 +82,6 @@ export default function Home() {
         </div>
       </section>
 
-      <main>
         <section className="section" aria-labelledby="example-h">
           <div className="wrap">
             <p className="eyebrow">What a Role Report looks like</p>
@@ -385,6 +376,7 @@ export default function Home() {
       </main>
 
       <SiteFooter />
+      <JsonLd data={homeJsonLd()} />
     </>
   );
 }

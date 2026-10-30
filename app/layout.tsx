@@ -8,25 +8,41 @@ import "@fontsource/libre-franklin/latin-600.css";
 import "@fontsource/libre-franklin/latin-700.css";
 import Script from "next/script";
 import "./globals.css";
+import { HOME_DESCRIPTION, HOME_TITLE, SITE_NAME, SITE_URL } from "@/lib/site";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-05639XJBEN";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://taskerandsteward.com";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Tasker & Steward | AI staffing with human accountability",
-  description:
-    "Most job descriptions were written before AI could do any of the work. Send us a role you're hiring for and get a free Role Report: what an AI agent can carry, what still needs a person, and what each option costs.",
+  title: { default: HOME_TITLE, template: "%s | Tasker & Steward" },
+  description: HOME_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
+  keywords: [
+    "AI staffing agency",
+    "AI agents for small business",
+    "AI receptionist",
+    "after-hours answering service",
+    "AI lead follow-up",
+    "Role Report",
+    "home services AI",
+  ],
   openGraph: {
     title: "Still hiring like it's 2019? | Tasker & Steward",
     description:
       "Get a free Role Report. We break your job posting down duty by duty and show what an AI agent can handle, managed by a real person on our team.",
-    url: SITE_URL,
-    siteName: "Tasker & Steward",
+    url: "/",
+    siteName: SITE_NAME,
     type: "website",
+    locale: "en_US",
   },
-  twitter: { card: "summary_large_image" },
+  twitter: {
+    card: "summary_large_image",
+    title: "Still hiring like it's 2019? | Tasker & Steward",
+    description: "Get a free Role Report: what an AI agent can carry, what still needs a person, and what each option costs.",
+  },
+  robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 } },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {

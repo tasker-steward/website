@@ -3,7 +3,8 @@ import LegalHeader from "../components/LegalHeader";
 import SiteFooter from "../components/SiteFooter";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | Tasker & Steward",
+  title: "Privacy Policy",
+  alternates: { canonical: "/privacy" },
   description: "How Tasker & Steward collects, uses and protects your information.",
 };
 
