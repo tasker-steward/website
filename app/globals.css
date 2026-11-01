@@ -298,3 +298,32 @@ img, svg { max-width: 100%; }
 .faq-page-cta { margin-top: 56px; padding: 32px; background: var(--navy); color: var(--on-navy); border-radius: 16px; }
 .faq-page-cta h2 { font-family: var(--display); font-weight: 400; font-size: 28px; color: #fff; margin: 0; }
 .faq-page-cta p { margin: 10px 0 20px; font-size: 17px; line-height: 1.6; }
+
+/* Survey (taskerandsteward.com/survey/…, built in the CRM) */
+.survey { max-width: 720px; margin: 0 auto; padding: 40px 20px 80px; }
+.survey-head h1 { margin: 10px 0 0; font-family: var(--display); font-weight: 400; font-size: clamp(32px, 6vw, 46px); line-height: 1.1; text-wrap: balance; }
+.survey-intro { margin: 16px 0 0; font-size: 18px; line-height: 1.6; color: var(--ink-2); }
+.survey-raffle { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; margin-top: 24px; }
+.survey-raffle p { flex: 1 1 220px; margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink-2); }
+.giftcard { width: 220px; height: auto; flex: 0 0 auto; filter: drop-shadow(0 10px 22px rgba(20, 36, 58, 0.25)); }
+.survey-run-by { margin: 20px 0 0; font-size: 13px; line-height: 1.55; color: var(--ink-3); }
+.survey-card { margin-top: 28px; background: #fff; border: 1px solid var(--line); border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; gap: 16px; }
+.survey-card h2 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.25; }
+.survey-card h2:focus { outline: none; }
+.survey-card p { margin: 0; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+.survey-progress { height: 8px; border-radius: 999px; background: var(--line-2); overflow: hidden; }
+.survey-progress span { display: block; height: 100%; background: var(--red); border-radius: 999px; transition: width 0.25s ease; }
+.survey-step { font-size: 13px !important; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-3) !important; }
+.survey-q { border: 0; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.survey-q legend { padding: 0; margin-bottom: 4px; }
+.survey-hint { display: block; margin-top: 6px; font-size: 14px; color: var(--ink-3); }
+.survey-options { display: flex; flex-direction: column; gap: 10px; }
+.survey-option { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 16px; border: 1px solid var(--field); border-radius: 12px; background: #fff; font-size: 16px; cursor: pointer; }
+.survey-option:hover { border-color: var(--navy); }
+.survey-option.is-on { border-color: var(--red); background: var(--blush); }
+.survey-option input { width: 20px; height: 20px; margin: 0; flex: 0 0 auto; accent-color: var(--red); }
+.survey-nav { display: flex; justify-content: space-between; gap: 12px; }
+.survey-nav .submit { margin-left: auto; }
+.survey-back { background: transparent; color: var(--navy); border: 1px solid var(--field); padding: 12px 22px; font-size: 16px; }
+.survey-back:hover { border-color: var(--navy); }
+@media (prefers-reduced-motion: reduce) { .survey-progress span { transition: none; } }
