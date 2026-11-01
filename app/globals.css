@@ -322,8 +322,22 @@ img, svg { max-width: 100%; }
 .survey-option:hover { border-color: var(--navy); }
 .survey-option.is-on { border-color: var(--red); background: var(--blush); }
 .survey-option input { width: 20px; height: 20px; margin: 0; flex: 0 0 auto; accent-color: var(--red); }
+/* Paired fields line up along the bottom even if a label wraps. */
+.survey-row .field { justify-content: flex-end; }
+.survey-q > .survey-hint { margin: -6px 0 0; }
 .survey-nav { display: flex; justify-content: space-between; gap: 12px; }
 .survey-nav .submit { margin-left: auto; }
 .survey-back { background: transparent; color: var(--navy); border: 1px solid var(--field); padding: 12px 22px; font-size: 16px; }
 .survey-back:hover { border-color: var(--navy); }
+.survey-who { margin: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--line-2); padding: 6px 18px; }
+.survey-who div { display: grid; grid-template-columns: 140px 1fr; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.survey-who div:first-child { border-top: 0; }
+.survey-who dt { font-size: 13px; font-weight: 600; color: var(--ink-3); }
+.survey-who dd { margin: 0; font-size: 16px; color: var(--navy); overflow-wrap: anywhere; }
+@media (max-width: 520px) { .survey-who div { grid-template-columns: 1fr; gap: 2px; } }
+.survey-who-actions { font-size: 14px !important; }
+.link-btn { background: none; border: 0; padding: 0; font: inherit; color: var(--navy); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.link-btn:hover { color: var(--red); }
+.survey-q > .field { flex: none; }
+.survey-privacy { font-size: 13px !important; color: var(--ink-3) !important; }
 @media (prefers-reduced-motion: reduce) { .survey-progress span { transition: none; } }

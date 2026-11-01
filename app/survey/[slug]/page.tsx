@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import GiftCard from "../../components/GiftCard";
 import LegalHeader from "../../components/LegalHeader";
 import SiteFooter from "../../components/SiteFooter";
-import { closeDate, getSurvey } from "@/lib/crm";
+import { closeDate, getPrefill, getSurvey } from "@/lib/crm";
 import SurveyForm from "./SurveyForm";
 
 type Params = { params: Promise<{ slug: string }> };
+type PageProps = Params & { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const survey = await getSurvey((await params).slug);
@@ -20,9 +21,12 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 // Surveys are built in the T&S CRM; this page renders whatever is live there.
-export default async function SurveyPage({ params }: Params) {
+// A personal link (?t=…) opens on "Is this you?" with the person's details.
+export default async function SurveyPage({ params, searchParams }: PageProps) {
   const survey = await getSurvey((await params).slug);
   if (!survey) notFound();
+  const t = (await searchParams).t;
+  const prefill = survey.open ? await getPrefill(survey.slug, typeof t === "string" ? t : undefined) : null;
   const closes = closeDate(survey.closesAt);
   const rulesUrl = survey.raffle.rulesUrl || `/survey/${survey.slug}/rules`;
   return (
@@ -48,7 +52,7 @@ export default async function SurveyPage({ params }: Params) {
           </p>
         </header>
         {survey.open ? (
-          <SurveyForm survey={survey} rulesUrl={rulesUrl} />
+          <SurveyForm survey={survey} rulesUrl={rulesUrl} prefill={prefill} />
         ) : (
           <section className="survey-card">
             <h2>This survey is closed</h2>

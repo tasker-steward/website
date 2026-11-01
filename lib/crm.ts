@@ -39,6 +39,34 @@ export async function getSurvey(slug: string): Promise<Survey | null> {
   return (await res.json()) as Survey;
 }
 
+export const COMPANY_SIZES = ["1 to 10", "11 to 50", "51 to 200", "201 to 500", "Over 500"] as const;
+
+/** Who a personal survey link was sent to, for the "Is this you?" step. */
+export type SurveyPrefill = {
+  firstName: string | null;
+  lastName: string | null;
+  email: string | null;
+  company: string | null;
+  title: string | null;
+  companySize: (typeof COMPANY_SIZES)[number] | null;
+};
+
+/**
+ * The invited person's details for a token from their email link. Server only,
+ * never cached. Null for a missing or unknown token, a person who already
+ * answered, or any CRM problem, in which case the survey simply starts blank.
+ */
+export async function getPrefill(slug: string, token: string | undefined): Promise<SurveyPrefill | null> {
+  if (!token || token.length < 8 || token.length > 64 || !/^[A-Za-z0-9_-]+$/.test(token)) return null;
+  try {
+    const res = await crmFetch(`/api/public/surveys/${encodeURIComponent(slug)}/prefill?t=${encodeURIComponent(token)}`, { cache: "no-store" });
+    if (!res || !res.ok) return null;
+    return (await res.json()) as SurveyPrefill;
+  } catch {
+    return null;
+  }
+}
+
 export function closeDate(iso: string | null): string | null {
   return iso ? new Date(iso).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" }) : null;
 }
