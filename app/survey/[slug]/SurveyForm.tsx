@@ -1,25 +1,45 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import type { Survey } from "@/lib/crm";
+import { COMPANY_SIZES, type Survey, type SurveyPrefill } from "@/lib/crm";
 
-const SIZES = ["1 to 10", "11 to 50", "51 to 200", "201 to 500", "Over 500"];
 // Same list as the Role Report form.
 const INDUSTRIES = ["Home services", "Healthcare", "Legal", "Professional services", "Finance and insurance", "Real estate", "Manufacturing", "Retail", "Hospitality", "Technology", "Nonprofit", "Other"];
 type Answer = string | string[];
+type Who = { name: string; email: string; company: string; title: string; company_size: string; industry: string };
 
-// One question per screen on phones and desktops alike, then the contact
-// block. The progress bar counts the questions plus the contact step.
-export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rulesUrl: string }) {
+const BLANK: Who = { name: "", email: "", company: "", title: "", company_size: "", industry: "" };
+const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function fromPrefill(p: SurveyPrefill | null): Who {
+  if (!p) return BLANK;
+  return {
+    name: [p.firstName, p.lastName].filter(Boolean).join(" "),
+    email: p.email ?? "",
+    company: p.company ?? "",
+    title: p.title ?? "",
+    company_size: p.companySize ?? "",
+    industry: "",
+  };
+}
+
+// Step 0 is "About you": an invited person confirms the details we sent the
+// email to ("Is this you?"); anyone else fills them in. Then one question per
+// screen, then a last step for the report, drawing and newsletter choices.
+export default function SurveyForm({ survey, rulesUrl, prefill = null }: { survey: Survey; rulesUrl: string; prefill?: SurveyPrefill | null }) {
   const qs = survey.questions;
-  const total = qs.length + 1;
+  const last = qs.length + 1;
+  const total = qs.length + 2;
   const [step, setStep] = useState(0);
+  const [who, setWho] = useState<Who>(() => fromPrefill(prefill));
+  const [editing, setEditing] = useState(!prefill?.email);
   const [answers, setAnswers] = useState<Record<string, Answer>>({});
   const [problem, setProblem] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
   const [error, setError] = useState("");
   const tracking = useRef<Record<string, string>>({});
   const heading = useRef<HTMLHeadingElement>(null);
+  const firstField = useRef<HTMLInputElement>(null);
 
   // The personal link from an email (?t=…&utm_content=step1) counts as a click.
   useEffect(() => {
@@ -41,17 +61,34 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
     if (step > 0) heading.current?.focus();
   }, [step]);
 
-  const q = step < qs.length ? qs[step] : null;
+  const q = step >= 1 && step <= qs.length ? qs[step - 1] : null;
   const value = q ? answers[q.id] : undefined;
   const answered = (a: Answer | undefined) => (Array.isArray(a) ? a.length > 0 : Boolean(a && a.trim()));
+  const set = (k: keyof Who) => (v: string) => setWho((w) => ({ ...w, [k]: v }));
 
   function next() {
+    if (step === 0) {
+      if (!EMAIL.test(who.email.trim())) {
+        setEditing(true);
+        setProblem("Please enter a valid work email to continue.");
+        return;
+      }
+      const w = window as unknown as { gtag?: (...args: unknown[]) => void };
+      w.gtag?.("event", "survey_details", { survey: survey.slug, prefilled: Boolean(prefill), edited: editing && Boolean(prefill) });
+    }
     if (q && q.required && !answered(value)) {
       setProblem(q.type === "multiple" ? "Choose at least one answer to continue." : "Choose an answer to continue.");
       return;
     }
     setProblem("");
     setStep(step + 1);
+  }
+
+  function edit(fresh: boolean) {
+    if (fresh) setWho(BLANK);
+    setEditing(true);
+    setProblem("");
+    setTimeout(() => firstField.current?.focus(), 0);
   }
 
   function toggle(option: string) {
@@ -63,7 +100,7 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (step < qs.length) return next();
+    if (step < last) return next();
     const data = Object.fromEntries(new FormData(e.currentTarget).entries()) as Record<string, string>;
     setStatus("sending");
     setError("");
@@ -73,12 +110,12 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           answers,
-          name: data.name,
-          email: data.email,
-          company: data.company,
-          title: data.title,
-          company_size: data.company_size,
-          industry: data.industry,
+          name: who.name,
+          email: who.email,
+          company: who.company,
+          title: who.title,
+          company_size: who.company_size,
+          industry: who.industry,
           wants_report: data.wants_report === "on",
           raffle_entry: data.raffle_entry === "on",
           marketing_consent: data.marketing_consent === "on",
@@ -94,7 +131,7 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
       if (!res.ok) throw new Error([body.error, ...(body.problems ?? [])].filter(Boolean).join(" ") || "Something went wrong.");
       setStatus("sent");
       const w = window as unknown as { gtag?: (...args: unknown[]) => void };
-      w.gtag?.("event", "survey_complete", { survey: survey.slug, raffle: data.raffle_entry === "on", source: tracking.current.utm_content || "direct" });
+      w.gtag?.("event", "survey_complete", { survey: survey.slug, raffle: data.raffle_entry === "on", prefilled: Boolean(prefill), source: tracking.current.utm_content || "direct" });
     } catch (err) {
       setError(err instanceof Error ? err.message : "We couldn't save your answers. Please try again.");
       setStatus("idle");
@@ -113,15 +150,145 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
     );
   }
 
+  const confirming = step === 0 && !editing;
   const pct = Math.round((step / total) * 100);
+  const label = step === 0 ? "About you" : q ? `Question ${step} of ${qs.length}` : "Last step";
+  const primary = confirming ? "Yes, that's me" : step < last ? "Next" : status === "sending" ? "Sending…" : "Submit";
+  const industrySelect = (
+    <label className="field">
+      Industry
+      <select name="industry" value={who.industry} onChange={(e) => set("industry")(e.target.value)}>
+        <option value="">Choose…</option>
+        {INDUSTRIES.map((i) => (
+          <option key={i} value={i}>
+            {i}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  const privacy = "Results are reported only in aggregate. Your name and company never appear in the report.";
+
   return (
-    <form className="survey-card" onSubmit={onSubmit} noValidate={step < qs.length}>
-      <div className="survey-progress" role="progressbar" aria-label="Survey progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={step} aria-valuetext={`Step ${Math.min(step + 1, total)} of ${total}`}>
+    <form className="survey-card" onSubmit={onSubmit} noValidate>
+      <div className="survey-progress" role="progressbar" aria-label="Survey progress" aria-valuemin={0} aria-valuemax={total} aria-valuenow={step} aria-valuetext={`Step ${step + 1} of ${total}`}>
         <span style={{ width: `${pct}%` }} />
       </div>
-      <p className="survey-step">{q ? `Question ${step + 1} of ${qs.length}` : "Last step"}</p>
+      <p className="survey-step">{label}</p>
 
-      {q ? (
+      {step === 0 && confirming && (
+        <fieldset className="survey-q">
+          <legend>
+            <h2 ref={heading} tabIndex={-1}>
+              Is this you?
+            </h2>
+            <span className="survey-hint">We filled this in from your invitation so you don&apos;t have to type it.</span>
+          </legend>
+          <dl className="survey-who">
+            {who.name && (
+              <div>
+                <dt>Name</dt>
+                <dd>{who.name}</dd>
+              </div>
+            )}
+            <div>
+              <dt>Work email</dt>
+              <dd>{who.email}</dd>
+            </div>
+            {who.company && (
+              <div>
+                <dt>Company</dt>
+                <dd>{who.company}</dd>
+              </div>
+            )}
+            {who.title && (
+              <div>
+                <dt>Role or title</dt>
+                <dd>{who.title}</dd>
+              </div>
+            )}
+            {who.company_size && (
+              <div>
+                <dt>Company size</dt>
+                <dd>{who.company_size} employees</dd>
+              </div>
+            )}
+          </dl>
+          <div className="row survey-row">{industrySelect}</div>
+          <p className="survey-who-actions">
+            <button type="button" className="link-btn" onClick={() => edit(false)}>
+              Edit details
+            </button>
+            <span aria-hidden="true"> · </span>
+            <button type="button" className="link-btn" onClick={() => edit(true)}>
+              Not you? Start with a blank form
+            </button>
+          </p>
+          <p className="survey-privacy">{privacy}</p>
+        </fieldset>
+      )}
+
+      {step === 0 && !confirming && (
+        <fieldset className="survey-q">
+          <legend>
+            <h2 ref={heading} tabIndex={-1}>
+              {prefill ? "Update your details" : "First, a little about you"}
+            </h2>
+            <span className="survey-hint">So we can send you the results report. Only your work email is required.</span>
+          </legend>
+          <div className="row survey-row">
+            <label className="field">
+              Name
+              <input ref={firstField} name="name" autoComplete="name" maxLength={120} value={who.name} onChange={(e) => set("name")(e.target.value)} />
+            </label>
+            <label className="field">
+              Work email
+              <input
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                maxLength={254}
+                value={who.email}
+                aria-invalid={Boolean(problem) || undefined}
+                onChange={(e) => (set("email")(e.target.value), setProblem(""))}
+              />
+            </label>
+          </div>
+          <div className="row survey-row">
+            <label className="field">
+              Company
+              <input name="company" autoComplete="organization" maxLength={200} value={who.company} onChange={(e) => set("company")(e.target.value)} />
+            </label>
+            <label className="field">
+              Role or title
+              <input name="title" autoComplete="organization-title" maxLength={120} value={who.title} onChange={(e) => set("title")(e.target.value)} />
+            </label>
+          </div>
+          <div className="row survey-row">
+            {industrySelect}
+            <label className="field">
+              Company size
+              <select name="company_size" value={who.company_size} onChange={(e) => set("company_size")(e.target.value)}>
+                <option value="">Choose…</option>
+                {COMPANY_SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s} employees
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <p className="survey-privacy">{privacy}</p>
+          {problem && (
+            <p className="form-error" role="alert">
+              {problem}
+            </p>
+          )}
+        </fieldset>
+      )}
+
+      {q && (
         <fieldset className="survey-q" key={q.id}>
           <legend>
             <h2 ref={heading} tabIndex={-1}>
@@ -160,58 +327,16 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
             </p>
           )}
         </fieldset>
-      ) : (
+      )}
+
+      {step === last && (
         <fieldset className="survey-q">
           <legend>
             <h2 ref={heading} tabIndex={-1}>
-              Where should we send the results?
+              Almost done
             </h2>
+            <span className="survey-hint">We&apos;ll send the report to {who.email}.</span>
           </legend>
-          <p className="survey-hint">Only your work email is required.</p>
-          <div className="row survey-row">
-            <label className="field">
-              Name
-              <input name="name" autoComplete="name" maxLength={120} />
-            </label>
-            <label className="field">
-              Work email
-              <input name="email" type="email" autoComplete="email" required maxLength={254} />
-            </label>
-          </div>
-          <div className="row survey-row">
-            <label className="field">
-              Company
-              <input name="company" autoComplete="organization" maxLength={200} />
-            </label>
-            <label className="field">
-              Role or title
-              <input name="title" autoComplete="organization-title" maxLength={120} />
-            </label>
-          </div>
-          <div className="row survey-row">
-            <label className="field">
-              Industry
-              <select name="industry" defaultValue="">
-                <option value="">Choose…</option>
-                {INDUSTRIES.map((i) => (
-                  <option key={i} value={i}>
-                    {i}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              Company size
-              <select name="company_size" defaultValue="">
-                <option value="">Choose…</option>
-                {SIZES.map((s) => (
-                  <option key={s} value={s}>
-                    {s} employees
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
           <label className="consent">
             <input type="checkbox" name="wants_report" defaultChecked />
             <span>Send me the results report.</span>
@@ -248,7 +373,7 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
           </button>
         )}
         <button type="submit" className="btn btn-red submit" disabled={status === "sending"}>
-          {q ? "Next" : status === "sending" ? "Sending…" : "Submit"}
+          {primary}
         </button>
       </div>
     </form>
