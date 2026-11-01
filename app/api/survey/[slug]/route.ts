@@ -31,6 +31,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ slug: s
     company: clean(body.company, 200) || null,
     title: clean(body.title, 120) || null,
     company_size: clean(body.company_size, 40) || null,
+    industry: clean(body.industry, 60) || null,
     wants_report: body.wants_report !== false,
     raffle_entry: body.raffle_entry === true,
     marketing_consent: body.marketing_consent === true,

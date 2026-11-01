@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { Survey } from "@/lib/crm";
 
 const SIZES = ["1 to 10", "11 to 50", "51 to 200", "201 to 500", "Over 500"];
+// Same list as the Role Report form.
+const INDUSTRIES = ["Home services", "Healthcare", "Legal", "Professional services", "Finance and insurance", "Real estate", "Manufacturing", "Retail", "Hospitality", "Technology", "Nonprofit", "Other"];
 type Answer = string | string[];
 
 // One question per screen on phones and desktops alike, then the contact
@@ -76,6 +78,7 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
           company: data.company,
           title: data.title,
           company_size: data.company_size,
+          industry: data.industry,
           wants_report: data.wants_report === "on",
           raffle_entry: data.raffle_entry === "on",
           marketing_consent: data.marketing_consent === "on",
@@ -164,9 +167,10 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
               Where should we send the results?
             </h2>
           </legend>
-          <div className="row">
+          <p className="survey-hint">Only your work email is required.</p>
+          <div className="row survey-row">
             <label className="field">
-              Name <span className="opt">(optional)</span>
+              Name
               <input name="name" autoComplete="name" maxLength={120} />
             </label>
             <label className="field">
@@ -174,27 +178,40 @@ export default function SurveyForm({ survey, rulesUrl }: { survey: Survey; rules
               <input name="email" type="email" autoComplete="email" required maxLength={254} />
             </label>
           </div>
-          <div className="row">
+          <div className="row survey-row">
             <label className="field">
-              Company <span className="opt">(optional)</span>
+              Company
               <input name="company" autoComplete="organization" maxLength={200} />
             </label>
             <label className="field">
-              Role or title <span className="opt">(optional)</span>
+              Role or title
               <input name="title" autoComplete="organization-title" maxLength={120} />
             </label>
           </div>
-          <label className="field">
-            Company size <span className="opt">(optional)</span>
-            <select name="company_size" defaultValue="">
-              <option value="">Choose…</option>
-              {SIZES.map((s) => (
-                <option key={s} value={s}>
-                  {s} employees
-                </option>
-              ))}
-            </select>
-          </label>
+          <div className="row survey-row">
+            <label className="field">
+              Industry
+              <select name="industry" defaultValue="">
+                <option value="">Choose…</option>
+                {INDUSTRIES.map((i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="field">
+              Company size
+              <select name="company_size" defaultValue="">
+                <option value="">Choose…</option>
+                {SIZES.map((s) => (
+                  <option key={s} value={s}>
+                    {s} employees
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
           <label className="consent">
             <input type="checkbox" name="wants_report" defaultChecked />
             <span>Send me the results report.</span>

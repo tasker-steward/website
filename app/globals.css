@@ -322,6 +322,9 @@ img, svg { max-width: 100%; }
 .survey-option:hover { border-color: var(--navy); }
 .survey-option.is-on { border-color: var(--red); background: var(--blush); }
 .survey-option input { width: 20px; height: 20px; margin: 0; flex: 0 0 auto; accent-color: var(--red); }
+/* Paired fields line up along the bottom even if a label wraps. */
+.survey-row .field { justify-content: flex-end; }
+.survey-q > .survey-hint { margin: -6px 0 0; }
 .survey-nav { display: flex; justify-content: space-between; gap: 12px; }
 .survey-nav .submit { margin-left: auto; }
 .survey-back { background: transparent; color: var(--navy); border: 1px solid var(--field); padding: 12px 22px; font-size: 16px; }
